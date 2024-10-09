@@ -48,7 +48,7 @@ const ButtonSignin = ({ text = "Get started", extraStyle }) => {
 
   return (
     <button
-      className={`btn ${extraStyle ? extraStyle : ""}`}
+      className={`btn ${extraStyle ? extraStyle : ""} text-pink-500 bg-pink-500/10`}
       onClick={handleClick}
     >
       {text}
