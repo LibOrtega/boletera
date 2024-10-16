@@ -25,30 +25,30 @@ const ButtonSignin = ({ text = "Get started", extraStyle }) => {
     return (
       <Link
         href={config.auth.callbackUrl}
-        className={`btn ${extraStyle ? extraStyle : ""}`}
+        className={`btn bg-pink-500 hover:bg-pink-600 text-white border-none ${extraStyle ? extraStyle : ""}`}
       >
         {session.user?.image ? (
           <img
             src={session.user?.image}
             alt={session.user?.name || "Account"}
-            className="w-6 h-6 rounded-full shrink-0"
+            className="w-6 h-6 rounded-full shrink-0 border-2 border-white"
             referrerPolicy="no-referrer"
             width={24}
             height={24}
           />
         ) : (
-          <span className="w-6 h-6 bg-base-300 flex justify-center items-center rounded-full shrink-0">
+          <span className="w-6 h-6 bg-pink-300 flex justify-center items-center rounded-full shrink-0 border-2 border-white text-pink-700 font-bold">
             {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
           </span>
         )}
-        {session.user?.name || session.user?.email || "Account"}
+        <span className="ml-2">{session.user?.name || session.user?.email || "Account"}</span>
       </Link>
     );
   }
 
   return (
     <button
-      className={`btn ${extraStyle ? extraStyle : ""} text-pink-500 bg-pink-500/10`}
+      className={`btn bg-pink-500 hover:bg-pink-600 text-white border-none ${extraStyle ? extraStyle : ""}`}
       onClick={handleClick}
     >
       {text}
