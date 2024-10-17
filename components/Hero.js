@@ -6,13 +6,16 @@ const Hero = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [events, setEvents] = useState([]);
 
+  const [eventsByMonth, setEventsByMonth] = useState({});
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await fetch('/api/events');
         if (res.ok) {
           const data = await res.json();
-          setEvents(data);
+          const grouped = groupEventsByMonth(data);
+          setEventsByMonth(grouped);
         } else {
           console.error('Failed to fetch events');
         }
@@ -23,6 +26,26 @@ const Hero = () => {
 
     fetchEvents();
   }, []);
+
+  const groupEventsByMonth = (events) => {
+    return events.reduce((acc, event) => {
+      const date = new Date(event.date);
+      const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+      if (!acc[monthYear]) {
+        acc[monthYear] = [];
+      }
+      acc[monthYear].push(event);
+      return acc;
+    }, {});
+  };
+
+  const sortMonthYearGroups = (groupedEvents) => {
+    return Object.entries(groupedEvents).sort((a, b) => {
+      const dateA = new Date(a[0].split(' ').reverse().join(' '));
+      const dateB = new Date(b[0].split(' ').reverse().join(' '));
+      return dateA - dateB;
+    });
+  };
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,26 +101,29 @@ const Hero = () => {
         )}
       </div>
 
-      <h1 className="text-3xl sm:text-4xl font-bold mb-6">Octubre 2024</h1>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <div key={event._id} className="bg-base-200 rounded-lg overflow-hidden shadow-md flex flex-col">
-            <img src={event.image} alt={event.name} className="w-full h-48 object-cover" />
-            <div className="p-4 flex-grow">
-              <p className="text-sm text-base-content opacity-60 mb-2">{event.date}</p>
-              <h3 className="text-lg font-bold mb-2">{event.name}</h3>
-              <p className="text-sm text-base-content opacity-60 mb-1">
-                <span className="inline-block mr-2">📍</span>{event.location}
-              </p>
-              <p className="text-sm text-base-content opacity-60 mb-4">
-                <span className="inline-block mr-2">🎟️</span>{event.organizer}
-              </p>
-              <button className="btn btn-primary w-full" onClick={() => handleBuyClick(event)}>Comprar</button>
-            </div>
+      {sortMonthYearGroups(eventsByMonth).map(([monthYear, monthEvents]) => (
+        <div key={monthYear}>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-6">{monthYear}</h1>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+            {monthEvents.map((event) => (
+              <div key={event._id} className="bg-base-200 rounded-lg overflow-hidden shadow-md flex flex-col">
+                <img src={event.image} alt={event.name} className="w-full h-48 object-cover" />
+                <div className="p-4 flex-grow">
+                  <p className="text-sm text-base-content opacity-60 mb-2">{event.date}</p>
+                  <h3 className="text-lg font-bold mb-2">{event.name}</h3>
+                  <p className="text-sm text-base-content opacity-60 mb-1">
+                    <span className="inline-block mr-2">📍</span>{event.location}
+                  </p>
+                  <p className="text-sm text-base-content opacity-60 mb-4">
+                    <span className="inline-block mr-2">🎟️</span>{event.organizer}
+                  </p>
+                  <button className="btn btn-primary w-full" onClick={() => handleBuyClick(event)}>Comprar</button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
