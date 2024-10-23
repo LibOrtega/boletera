@@ -11,7 +11,7 @@ const Hero = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
+    phone: '6141231234', // Número de ejemplo
     quantity: 1
   });
 
@@ -43,15 +43,31 @@ const Hero = () => {
     return date.toLocaleDateString('es-ES', options);
   };
 
-  const handleBuyClick = (event) => {
+  const handleBuyClick = async (event) => {
     setSelectedEvent(event);
     setIsModalOpen(true);
+    
+    // Lógica para crear la sesión de pago
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ eventId: event._id }), // Envía el ID del evento
+    });
+
+    if (response.ok) {
+      const session = await response.json();
+      window.location.href = session.url; // Redirige a la URL de Stripe
+    } else {
+      console.error('Error al crear la sesión de pago');
+    }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedEvent(null);
-    setFormData({ name: '', email: '', phone: '', quantity: 1 });
+    setFormData({ name: '', email: '', phone: '1234567890', quantity: 1 }); // Restablecer el número de ejemplo
   };
 
   const handleInputChange = (e) => {
@@ -135,7 +151,7 @@ const Hero = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="phone" className="block mb-2">Teléfono</label>
+                <label htmlFor="phone" className="block mb-2">Teléfono (10 dígitos)</label>
                 <input
                   type="tel"
                   id="phone"
@@ -143,6 +159,7 @@ const Hero = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="w-full p-2 border rounded"
+                  maxLength="10" // Limitar a 10 dígitos
                   required
                 />
               </div>

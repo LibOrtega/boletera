@@ -16,8 +16,9 @@ const MisComprasClient = () => {
   };
 
   const handleBuy = (event) => {
-    // Redirigir a la página de pago de Stripe
-    router.push(`/checkout?eventId=${event._id}`); // Cambia la ruta según tu implementación
+    // Redirigir a la URL de Stripe directamente
+    const stripeUrl = "https://buy.stripe.com/dR64hd5Hx2tC82AcMM"; // URL de tu evento de Stripe
+    window.location.href = stripeUrl; // Redirige a la URL de Stripe
   };
 
   return (
@@ -40,7 +41,7 @@ const MisComprasClient = () => {
               </button>
               <button 
                 className="btn bg-pink-200 hover:bg-pink-300 text-gray-800" 
-                onClick={() => handleBuy(item.event)}
+                onClick={() => handleBuy(item.event)} // Llama a handleBuy con el evento
               >
                 Comprar
               </button>
