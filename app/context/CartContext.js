@@ -11,8 +11,12 @@ export const CartProvider = ({ children }) => {
     setCart(prevCart => [...prevCart, item]);
   };
 
+  const removeFromCart = (eventId) => {
+    setCart(prevCart => prevCart.filter(item => item.event._id !== eventId)); // Filtra el carrito para eliminar el evento
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
       {children}
     </CartContext.Provider>
   );

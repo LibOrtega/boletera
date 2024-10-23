@@ -1,13 +1,24 @@
 "use client";
 
 import { useCart } from '@/app/context/CartContext';
+import { useRouter } from 'next/navigation';
 
 const MisComprasClient = () => {
-  const { cart } = useCart();
+  const { cart, removeFromCart } = useCart();
+  const router = useRouter();
 
   if (cart.length === 0) {
     return <p>No tienes compras recientes.</p>;
   }
+
+  const handleRemove = (eventId) => {
+    removeFromCart(eventId); // Llama a la función para eliminar el evento del carrito
+  };
+
+  const handleBuy = (event) => {
+    // Redirigir a la página de pago de Stripe
+    router.push(`/checkout?eventId=${event._id}`); // Cambia la ruta según tu implementación
+  };
 
   return (
     <div>
@@ -20,6 +31,20 @@ const MisComprasClient = () => {
             <p>Comprador: {item.buyer.name}</p>
             <p>Email: {item.buyer.email}</p>
             <p>Teléfono: {item.buyer.phone}</p>
+            <div className="flex justify-between mt-4">
+              <button 
+                className="btn bg-red-500 hover:bg-red-600 text-white" 
+                onClick={() => handleRemove(item.event._id)} // Llama a handleRemove con el ID del evento
+              >
+                Eliminar Evento
+              </button>
+              <button 
+                className="btn bg-pink-200 hover:bg-pink-300 text-gray-800" 
+                onClick={() => handleBuy(item.event)}
+              >
+                Comprar
+              </button>
+            </div>
           </li>
         ))}
       </ul>

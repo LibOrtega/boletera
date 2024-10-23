@@ -9,14 +9,7 @@ import logo from "@/app/icon.png";
 import config from "@/config";
 
 const links = [
-  {
-    href: "/mis-compras",
-    label: "Mis Compras",
-  },
-  {
-    href: "/admin/eventos",
-    label: "Administrar Eventos",
-  },
+  // Removed "Mis Compras" and "Administrar Eventos" links
 ];
 
 const cta = <ButtonSignin extraStyle="btn-primary" />;
@@ -78,22 +71,12 @@ const Header = () => {
         </div>
 
         <div className="hidden lg:flex lg:justify-end lg:flex-1 lg:items-center lg:space-x-4">
-          {cta}
           <Link href="/mis-compras" className="btn btn-ghost btn-circle">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </Link>
-          {links.map((link) => (
-          <Link
-            href={link.href}
-            key={link.href}
-            className="link link-hover"
-            title={link.label}
-          >
-            {link.label}
-          </Link>
-        ))}
+          {cta}
         </div>
       </nav>
 
@@ -144,16 +127,6 @@ const Header = () => {
           <div className="flow-root mt-6">
             <div className="py-4">
               <div className="flex flex-col gap-y-4 items-start">
-                {links.map((link) => (
-                  <Link
-                    href={link.href}
-                    key={link.href}
-                    className="link link-hover"
-                    title={link.label}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
                 <Link href="/mis-compras" className="link link-hover">
                   Carrito
                 </Link>
