@@ -8,7 +8,7 @@ const MisComprasClient = () => {
   const router = useRouter();
 
   if (cart.length === 0) {
-    return <p>No tienes compras recientes.</p>;
+    return <p className="text-pink-300">No tienes compras recientes.</p>; // Cambiado a rosa
   }
 
   const handleRemove = (eventId) => {
@@ -25,13 +25,13 @@ const MisComprasClient = () => {
     <div>
       <ul className="space-y-4">
         {cart.map((item, index) => (
-          <li key={index} className="bg-base-200 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold">{item.event.name}</h3>
-            <p>Fecha: {item.event.formattedDate}</p>
-            <p>Cantidad: {item.quantity}</p>
-            <p>Comprador: {item.buyer.name}</p>
-            <p>Email: {item.buyer.email}</p>
-            <p>Teléfono: {item.buyer.phone}</p>
+          <li key={index} className="bg-gray-800 text-white p-4 rounded-lg shadow"> {/* Cambiado a fondo gris oscuro y texto blanco */}
+            <h3 className="text-lg font-semibold">{item.event.name}</h3> {/* Cambiado a blanco */}
+            <p>Fecha: {item.event.formattedDate}</p> {/* Cambiado a blanco */}
+            <p>Cantidad: {item.quantity}</p> {/* Cambiado a blanco */}
+            <p>Comprador: {item.buyer.name}</p> {/* Cambiado a blanco */}
+            <p>Email: {item.buyer.email}</p> {/* Cambiado a blanco */}
+            <p>Teléfono: {item.buyer.phone}</p> {/* Cambiado a blanco */}
             <div className="flex justify-between mt-4">
               <button 
                 className="btn bg-red-500 hover:bg-red-600 text-white" 
