@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import { useRouter } from 'next/navigation';
+import apiClient from '@/libs/api';
 import Image from 'next/image';
 
 const Hero = () => {
@@ -22,13 +23,9 @@ const Hero = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch('/api/events');
-        if (res.ok) {
-          const data = await res.json();
-          setEvents(data);
-        } else {
-          console.error('Failed to fetch events');
-        }
+        const eventsResponse = await apiClient.get("/events")
+        setEvents(eventsResponse)
+        console.log("eventsResponse", eventsResponse)
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -68,11 +65,17 @@ const Hero = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedEvent(null);
-    setFormData({ name: '', email: '', phone: '1234567890', quantity: 1 }); // Restablecer el número de ejemplo
+    setFormData({ name: '', email: '', phone: '6141231234', quantity: 1 }); // Restablecer el número de ejemplo
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePhoneFocus = () => {
+    if (formData.phone === '6141231234') {
+      setFormData({ ...formData, phone: '' }); // Borra el número de ejemplo al hacer clic
+    }
   };
 
   const handleSubmit = (e) => {
@@ -108,6 +111,9 @@ const Hero = () => {
                 </p>
                 <p className="text-sm opacity-60 mb-4">
                   <span className="inline-block mr-2">🎟️</span>{event.organizer}
+                </p>
+                <p className="text-xl opacity-60 mb-4 font-bold ">
+                  <span className="inline-block mr-2 ">🤑</span>${event.price} MXN
                 </p>
               </div>
 
@@ -160,6 +166,7 @@ const Hero = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
+                  onFocus={handlePhoneFocus} // Borra el número de ejemplo al hacer clic
                   className="w-full p-2 border rounded"
                   maxLength="10" // Limitar a 10 dígitos
                   placeholder="Ej: 6141231234" // Placeholder agregado

@@ -2,6 +2,7 @@
 
 import { useCart } from '@/app/context/CartContext';
 import { useRouter } from 'next/navigation';
+import ButtonCheckout from '@/components/ButtonCheckout';
 
 const MisComprasClient = () => {
   const { cart, removeFromCart } = useCart();
@@ -17,7 +18,7 @@ const MisComprasClient = () => {
 
   const handleBuy = (event) => {
     // Redirigir a la URL de Stripe directamente
-    const stripeUrl = "https://buy.stripe.com/dR64hd5Hx2tC82AcMM"; // URL de tu evento de Stripe
+    const stripeUrl = "https://buy.stripe.com/dR64hd5Hx2tC82AcMM?quantity=5"; // URL de tu evento de Stripe
     window.location.href = stripeUrl; // Redirige a la URL de Stripe
   };
 
@@ -39,11 +40,13 @@ const MisComprasClient = () => {
               >
                 Eliminar Evento
               </button>
+
+              <ButtonCheckout />
               <button 
                 className="btn bg-pink-200 hover:bg-pink-300 text-gray-800" 
                 onClick={() => handleBuy(item.event)} // Llama a handleBuy con el evento
               >
-                Comprar
+                Comprar  1
               </button>
             </div>
           </li>
