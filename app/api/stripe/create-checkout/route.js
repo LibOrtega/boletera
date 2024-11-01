@@ -40,10 +40,13 @@ export async function POST(req) {
 
     const { priceId, mode, successUrl, cancelUrl } = body;
 
+    // Actualiza la URL de éxito a tu página personalizada
+    const customSuccessUrl = "/thanks"; // Usa la ruta relativa a tu página de agradecimiento
+
     const stripeSessionURL = await createCheckout({
       priceId,
       mode,
-      successUrl,
+      successUrl: customSuccessUrl, // Usa la URL personalizada
       cancelUrl,
       // If user is logged in, it will pass the user ID to the Stripe Session so it can be retrieved in the webhook later
       clientReferenceId: user?._id?.toString(),
