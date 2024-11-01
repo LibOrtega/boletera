@@ -55,7 +55,6 @@ const Hero = () => {
     setFormData({ ...formData, [name]: value });
 
   
-
     // Calcular el costo total cada vez que cambie la cantidad
     if (name === 'quantity') {
       const newTotalCost = selectedEvent.price * value; // Calcula el nuevo costo total
@@ -69,7 +68,7 @@ const Hero = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // El costo total ya se calcula en handleInputChange
     console.log("Evento:", selectedEvent.name);
@@ -90,10 +89,18 @@ const Hero = () => {
       return;
     }
 
-    console.log("todo cool perro")
+ 
 
-    // Aquí puedes agregar la lógica para redirigir a Stripe o mostrar un mensaje
-    
+    //Empieza el proceso de Stripe PERRO
+
+   try {
+    console.log("todo cool perro")
+   const response = await apiClient.post("/stripe/create-stripe-link")
+   console.log("response", response)
+   } catch (error) {
+    console.log("Error")
+    toast.error("Algo fallo en el servidor, contacta a lib")
+   }
 
    
   };
