@@ -38,11 +38,12 @@ const Header = () => {
         <span className="text-xl font-bold text-pink-300">Liberticket</span>
       </div>
       <div className="flex space-x-2">
-        <Link href="/mis-compras">
+        {/* Eliminar el botón del carrito */}
+        {/* <Link href="/mis-compras">
           <button className="px-4 py-2 text-sm font-medium text-pink-300 bg-transparent border border-pink-300 rounded-md hover:bg-pink-300 hover:text-black transition-colors">
             Carrito
           </button>
-        </Link>
+        </Link> */}
       </div>
     </header>
   );

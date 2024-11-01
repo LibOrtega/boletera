@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { useCart } from '@/app/context/CartContext';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/libs/api';
-import Image from 'next/image';
 
 const Hero = () => {
   const [events, setEvents] = useState([]);
@@ -17,15 +15,18 @@ const Hero = () => {
     quantity: 1
   });
 
-  const { addToCart } = useCart();
   const router = useRouter();
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const eventsResponse = await apiClient.get("/events")
-        setEvents(eventsResponse)
-        console.log("eventsResponse", eventsResponse)
+        const res = await fetch('/api/events');
+        if (res.ok) {
+          const data = await res.json();
+          setEvents(data);
+        } else {
+          console.error('Failed to fetch events');
+        }
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -44,22 +45,6 @@ const Hero = () => {
   const handleBuyClick = async (event) => {
     setSelectedEvent(event);
     setIsModalOpen(true);
-    
-    // Lógica para crear la sesión de pago
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ eventId: event._id }), // Envía el ID del evento
-    });
-
-    if (response.ok) {
-      const session = await response.json();
-      window.location.href = session.url; // Redirige a la URL de Stripe
-    } else {
-      console.error('Error al crear la sesión de pago');
-    }
   };
 
   const handleCloseModal = () => {
@@ -78,21 +63,30 @@ const Hero = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const cartItem = {
-      event: selectedEvent,
-      quantity: parseInt(formData.quantity),
-      buyer: {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone
-      }
-    };
-    addToCart(cartItem);
-    console.log('Añadido al carrito:', cartItem);
-    handleCloseModal();
-    router.push('/mis-compras');
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        eventId: selectedEvent._id,
+        quantity: parseInt(formData.quantity),
+        buyer: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
+        }
+      }),
+    });
+
+    if (response.ok) {
+      const session = await response.json();
+      window.location.href = session.url; // Redirige a la URL de Stripe
+    } else {
+      console.error('Error al crear la sesión de pago');
+    }
   };
 
   return (
@@ -198,7 +192,7 @@ const Hero = () => {
                   type="submit" 
                   className="btn bg-pink-200 hover:bg-pink-300 text-gray-800 border-none"
                 >
-                  Añadir al Carrito
+                  Comprar
                 </button>
               </div>
             </form>
