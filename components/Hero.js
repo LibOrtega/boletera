@@ -95,7 +95,17 @@ const Hero = () => {
 
    try {
     console.log("todo cool perro")
-   const response = await apiClient.post("/stripe/create-stripe-link")
+
+    const dataToSend = {
+      "eventName": selectedEvent.name, 
+      "buyerName": formData.name, 
+      "email":  formData.email, 
+      "phone":  formData.phone, 
+      "quantity": formData.quantity, 
+      "totalAmount": totalCost
+
+     }
+   const response = await apiClient.post("/stripe/create-stripe-link", dataToSend)
    console.log("response", response)
    } catch (error) {
     console.log("Error")
