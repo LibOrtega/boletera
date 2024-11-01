@@ -49,9 +49,9 @@ export async function POST(req) {
       quantity: 1,
       price_data: {
         currency: "MXN",
-        unit_amount: parseInt(parseFloat(totalAmount * 100).toFixed(2)),
+        unit_amount: parseFloat(fees.totalFees * 100),
         product_data: {
-          name: "cargos",
+          name: "Cargos LiberTicket",
           description: "Cargos LiberTicket",
           images: [
             "https://res.cloudinary.com/patitorosa/image/upload/v1660533341/extras/patitofee.jpg",
@@ -75,12 +75,6 @@ export async function POST(req) {
       qty: quantity,
       unitPrice: amount,
       totalAmount,
-    };
-
-    const data = {
-      lineItems,
-      metadata,
-      allowed_countries: ["MX"],
     };
 
     const options = {

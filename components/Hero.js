@@ -143,9 +143,9 @@ const Hero = () => {
         totalAmount: totalCost,
         eventId: selectedEvent._id,
         fees: {
-          stripeFee: costBreakdown.stripeFee,
-          serviceFee: costBreakdown.serviceFee,
-          totalFees: costBreakdown.totalFees,
+          stripeFee: parseFloat(costBreakdown.stripeFee),
+          serviceFee: parseFloat(costBreakdown.serviceFee),
+          totalFees: parseFloat(costBreakdown.totalFees),
         },
       };
       const response = await apiClient.post(
