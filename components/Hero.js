@@ -7,13 +7,14 @@ import apiClient from '@/libs/api';
 const Hero = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '6141231234', // Número de ejemplo
-    quantity: 1
+    quantity: 1 // Cantidad de boletos
   });
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para mostrar el formulario
+  const [totalCost, setTotalCost] = useState(0); // Estado para el costo total
 
   const router = useRouter();
 
@@ -42,19 +43,21 @@ const Hero = () => {
     return date.toLocaleDateString('es-ES', options);
   };
 
-  const handleBuyClick = async (event) => {
+  const handleBuyClick = (event) => {
     setSelectedEvent(event);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedEvent(null);
-    setFormData({ name: '', email: '', phone: '6141231234', quantity: 1 }); // Restablecer el número de ejemplo
+    setIsModalOpen(true); // Abre el formulario
+    setTotalCost(event.price); // Inicializa el costo total con el precio del evento
   };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Calcular el costo total cada vez que cambie la cantidad
+    if (name === 'quantity') {
+      const newTotalCost = selectedEvent.price * value; // Calcula el nuevo costo total
+      setTotalCost(newTotalCost);
+    }
   };
 
   const handlePhoneFocus = () => {
@@ -63,30 +66,20 @@ const Hero = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        eventId: selectedEvent._id,
-        quantity: parseInt(formData.quantity),
-        buyer: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone
-        }
-      }),
-    });
+    // El costo total ya se calcula en handleInputChange
+    console.log("Evento:", selectedEvent.name);
+    console.log("Nombre:", formData.name);
+    console.log("Correo:", formData.email);
+    console.log("Teléfono:", formData.phone);
+    console.log("Cantidad de boletos:", formData.quantity);
+    console.log("Costo total:", totalCost);
 
-    if (response.ok) {
-      const session = await response.json();
-      window.location.href = session.url; // Redirige a la URL de Stripe
-    } else {
-      console.error('Error al crear la sesión de pago');
-    }
+    // Aquí puedes agregar la lógica para redirigir a Stripe o mostrar un mensaje
+    
+
+   
   };
 
   return (
@@ -113,7 +106,7 @@ const Hero = () => {
 
               <button 
                 className="btn w-full mt-auto bg-pink-200 hover:bg-pink-300 text-gray-800 border-none" 
-                onClick={() => handleBuyClick(event)}
+                onClick={() => handleBuyClick(event)}                                   
               >
                 Comprar
               </button>
@@ -122,14 +115,14 @@ const Hero = () => {
         ))}
       </div>
 
+      {/* Modal para el formulario de compra */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full"> {/* Cambiado a gris oscuro */}
-            <h2 className="text-2xl font-bold mb-4 text-white">Añadir al Carrito</h2> {/* Cambiado a blanco */}
-            <p className="mb-4 text-white">Evento: {selectedEvent?.name}</p> {/* Cambiado a blanco */}
+          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-white">Completa tu compra</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label htmlFor="name" className="block mb-2 text-white">Nombre completo</label> {/* Cambiado a blanco */}
+                <label htmlFor="name" className="block mb-2 text-white">Nombre completo</label>
                 <input
                   type="text"
                   id="name"
@@ -141,7 +134,7 @@ const Hero = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="email" className="block mb-2 text-white">Correo electrónico</label> {/* Cambiado a blanco */}
+                <label htmlFor="email" className="block mb-2 text-white">Correo electrónico</label>
                 <input
                   type="email"
                   id="email"
@@ -153,7 +146,7 @@ const Hero = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="phone" className="block mb-2 text-white">Teléfono (10 dígitos)</label> {/* Cambiado a blanco */}
+                <label htmlFor="phone" className="block mb-2 text-white">Teléfono (10 dígitos)</label>
                 <input
                   type="tel"
                   id="phone"
@@ -168,22 +161,42 @@ const Hero = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="quantity" className="block mb-2 text-white">Cantidad de boletos</label> {/* Cambiado a blanco */}
-                <input
-                  type="number"
-                  id="quantity"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  min="1"
-                  className="w-full p-2 border rounded"
-                  required
-                />
+                <label htmlFor="quantity" className="block mb-2 text-white">Cantidad de boletos</label>
+                <div className="flex items-center">
+                  <button 
+                    type="button" 
+                    onClick={() => handleInputChange({ target: { name: 'quantity', value: Math.max(1, formData.quantity - 1) } })} 
+                    className="btn bg-pink-200 hover:bg-pink-300 text-gray-800 border-none mr-2"
+                  >
+                    -
+                  </button>
+                  <label className="text-white p-2 border rounded">{formData.quantity}</label>
+                  <button 
+                    type="button" 
+                    onClick={() => handleInputChange({ target: { name: 'quantity', value: parseInt(formData.quantity) + 1 } })} 
+                    className="btn bg-pink-200 hover:bg-pink-300 text-gray-800 border-none ml-2"
+                  >
+                    +
+                  </button>
+                  <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    value={formData.quantity}
+                    onChange={handleInputChange} // Actualiza la cantidad y calcula el costo total
+                    min="1"
+                    className="hidden" // Oculta el input
+                    required
+                  />
+                </div>
+              </div>
+              <div className="mb-4 text-white">
+                <p>Costo total: ${totalCost} MXN</p> {/* Muestra el costo total */}
               </div>
               <div className="flex justify-end">
                 <button 
                   type="button" 
-                  onClick={handleCloseModal} 
+                  onClick={() => setIsModalOpen(false)} 
                   className="btn mr-2 bg-pink-200 hover:bg-pink-300 text-gray-800 border-none"
                 >
                   Cancelar
@@ -199,7 +212,6 @@ const Hero = () => {
           </div>
         </div>
       )}
-   
     </section>
   );
 };
@@ -225,7 +237,7 @@ function EventCard({ image, title, date, location, organizer }) {
         <p className="text-sm text-gray-400 mb-1">{date}</p>
         <p className="text-sm text-gray-400">{location}</p>
         <p className="text-sm text-base-content opacity-60 mb-4">
-                  <span className="inline-block mr-2">🎟️</span>{organizer}
+                  <span className="inline-block mr-2">🎟</span>{organizer}
                 </p>
       </div>
       
