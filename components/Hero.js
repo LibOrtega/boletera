@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/libs/api';
+import toast from 'react-hot-toast';
 
 const Hero = () => {
   const [events, setEvents] = useState([]);
@@ -53,6 +54,8 @@ const Hero = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
+  
+
     // Calcular el costo total cada vez que cambie la cantidad
     if (name === 'quantity') {
       const newTotalCost = selectedEvent.price * value; // Calcula el nuevo costo total
@@ -75,6 +78,19 @@ const Hero = () => {
     console.log("Teléfono:", formData.phone);
     console.log("Cantidad de boletos:", formData.quantity);
     console.log("Costo total:", totalCost);
+
+    const validateEmail = (email) => {
+      const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      return regex.test(email);
+    };
+
+    if (!validateEmail(formData.email)) {
+      console.error('El email es inválido. Por favor, ingrese un email válido.');
+      toast.error("El email es invalido u.u")
+      return;
+    }
+
+    console.log("todo cool perro")
 
     // Aquí puedes agregar la lógica para redirigir a Stripe o mostrar un mensaje
     
