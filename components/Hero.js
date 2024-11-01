@@ -152,6 +152,16 @@ const Hero = () => {
         "/stripe/create-stripe-link",
         dataToSend
       );
+
+      const session = await stripe.redirectToCheckout({
+        sessionId: response.id,
+      });
+
+      if (session.error) {
+        console.error("Error al redirigir a Stripe:", session.error);
+        toast.error(session.error.message);
+      }
+
       console.log("response", response);
     } catch (error) {
       console.log("Error");
