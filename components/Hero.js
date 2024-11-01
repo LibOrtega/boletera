@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@/libs/api";
 import toast from "react-hot-toast";
+import { loadStripe } from "@stripe/stripe-js";
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_API_KEY);
 
 const Hero = () => {
   const [events, setEvents] = useState([]);
@@ -16,6 +18,12 @@ const Hero = () => {
   });
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para mostrar el formulario
   const [totalCost, setTotalCost] = useState(0); // Estado para el costo total
+  const [costBreakdown, setCostBreakdown] = useState({
+    subtotal: 0,
+    stripeFee: 0,
+    serviceFee: 0,
+    total: 0,
+  });
 
   const router = useRouter();
 
@@ -49,20 +57,42 @@ const Hero = () => {
     return date.toLocaleDateString("es-ES", options);
   };
 
+  const calculateFees = (baseAmount) => {
+    const subtotal = baseAmount * formData.quantity;
+    // Stripe fee: 3.6% + 3 MXN per transaction
+    const stripeFee = (subtotal * 0.036 + 3).toFixed(2);
+    // Service fee: 5% (ejemplo)
+    const serviceFee = (subtotal * 0.05).toFixed(2);
+
+    const totalFees = parseFloat(stripeFee) + parseFloat(serviceFee);
+    // Total
+    const total = (parseFloat(subtotal) + parseFloat(totalFees)).toFixed(2);
+
+    return {
+      subtotal: subtotal.toFixed(2),
+      stripeFee,
+      serviceFee,
+      totalFees,
+      total,
+    };
+  };
+
   const handleBuyClick = (event) => {
     setSelectedEvent(event);
-    setIsModalOpen(true); // Abre el formulario
-    setTotalCost(event.price); // Inicializa el costo total con el precio del evento
+    setIsModalOpen(true);
+    const costs = calculateFees(event.price);
+    setCostBreakdown(costs);
+    setTotalCost(costs.total);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Calcular el costo total cada vez que cambie la cantidad
     if (name === "quantity") {
-      const newTotalCost = selectedEvent.price * value; // Calcula el nuevo costo total
-      setTotalCost(newTotalCost);
+      const costs = calculateFees(selectedEvent.price);
+      setCostBreakdown(costs);
+      setTotalCost(costs.total);
     }
   };
 
@@ -74,6 +104,9 @@ const Hero = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const stripe = await stripePromise;
+
     // El costo total ya se calcula en handleInputChange
     console.log("Evento:", selectedEvent.name);
     console.log("Nombre:", formData.name);
@@ -109,6 +142,11 @@ const Hero = () => {
         amount: selectedEvent.price,
         totalAmount: totalCost,
         eventId: selectedEvent._id,
+        fees: {
+          stripeFee: costBreakdown.stripeFee,
+          serviceFee: costBreakdown.serviceFee,
+          totalFees: costBreakdown.totalFees,
+        },
       };
       const response = await apiClient.post(
         "/stripe/create-stripe-link",
@@ -269,9 +307,20 @@ const Hero = () => {
                   />
                 </div>
               </div>
-              <div className="mb-4 text-white">
-                <p>Costo total: ${totalCost} MXN</p>{" "}
-                {/* Muestra el costo total */}
+              <div className="mb-4 text-white space-y-2">
+                <div className="flex justify-between items-center">
+                  <span>Subtotal:</span>
+                  <span>${costBreakdown.subtotal} MXN</span>
+                </div>
+                <div className="flex justify-between items-center text-sm text-gray-400">
+                  <span>Cargos LiberTicket:</span>
+                  <span>${costBreakdown.totalFees} MXN</span>
+                </div>
+                <div className="h-px bg-gray-600 my-2"></div>
+                <div className="flex justify-between items-center font-bold">
+                  <span>Total:</span>
+                  <span>${costBreakdown.total} MXN</span>
+                </div>
               </div>
               <div className="flex justify-end">
                 <button
