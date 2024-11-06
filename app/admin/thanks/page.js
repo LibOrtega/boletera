@@ -1,11 +1,6 @@
+"use client"
 import { useEffect } from 'react';
 import Link from 'next/link';
-import MisComprasClient from './MisComprasClient';
-
-export const metadata = {
-  title: 'Checkout',
-  description: 'Gracias por tu compra',
-};
 
 export default function CheckoutPage() {
   useEffect(() => {
