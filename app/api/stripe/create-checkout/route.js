@@ -39,7 +39,7 @@ export async function POST(req) {
 
     const user = await User.findById(session?.user?.id);
 
-    const { priceId, mode, successUrl, cancelUrl } = body;
+    const { priceId, mode, cancelUrl } = body;
 
     // Actualiza la URL de éxito a tu página personalizada
     const customSuccessUrl =
