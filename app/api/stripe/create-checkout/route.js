@@ -41,7 +41,7 @@ export async function POST(req) {
     const { priceId, mode, successUrl, cancelUrl } = body;
 
     // Actualiza la URL de éxito a tu página personalizada
-    const customSuccessUrl = "/thanks"; // Usa la ruta relativa a tu página de agradecimiento
+    const customSuccessUrl = "http://localhost:3000/thanks"; // Para desarrollo
 
     const stripeSessionURL = await createCheckout({
       priceId,

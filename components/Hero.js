@@ -58,7 +58,7 @@ const Hero = () => {
   };
 
   const calculateFees = (baseAmount) => {
-    const subtotal = baseAmount * formData.quantity;
+    const subtotal = baseAmount;
     // Stripe fee: 3.6% + 3 MXN per transaction
     const stripeFee = (subtotal * 0.036 + 3).toFixed(2);
     // Service fee: 5% (ejemplo)
@@ -90,7 +90,7 @@ const Hero = () => {
     setFormData({ ...formData, [name]: value });
 
     if (name === "quantity") {
-      const costs = calculateFees(selectedEvent.price);
+      const costs = calculateFees(selectedEvent.price * value);
       setCostBreakdown(costs);
       setTotalCost(costs.total);
     }
