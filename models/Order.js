@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
+  orderId: {
+    type: String,
+    required: true,
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -14,8 +18,16 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  unitPrice: {
+    type: Number,
+    required: true,
+  },
   totalAmount: {
     type: Number,
+    required: true,
+  },
+  fees: {
+    type: Object,
     required: true,
   },
   status: {

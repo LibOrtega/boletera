@@ -6,6 +6,7 @@ import configFile from "@/config";
 import User from "@/models/User";
 import { findCheckoutSession } from "@/libs/stripe";
 import Order from "@/models/Order";
+const orderid = require("order-id")("key");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -44,8 +45,10 @@ export async function POST(req) {
 
         const session = await findCheckoutSession(data.object.id);
 
-        // Log metadata from the session
+        // Log the complete session metadata
         console.log("Session metadata:", session.metadata);
+
+        const { metadata } = session;
 
         const customerId = session?.customer;
         const priceId = session?.line_items?.data[0]?.price.id;
@@ -79,11 +82,14 @@ export async function POST(req) {
 
         // Create new order
         const newOrder = await Order.create({
+          orderId: orderid.generate(),
           userId: user._id,
-          eventId: session.metadata.eventId, // Assuming you're passing eventId in metadata
-          quantity: session.metadata.quantity || 1,
-          totalAmount: session.amount_total / 100, // Stripe amounts are in cents
+          eventId: metadata.eventId,
           stripeSessionId: session.id,
+          fees: metadata.fees,
+          unitPrice: parseFloat(metadata.unitPrice), // Convert string to number
+          quantity: parseInt(metadata.qty), // Convert string to number
+          totalAmount: parseFloat(metadata.totalAmount), // Convert string to number
         });
 
         await newOrder.save();
