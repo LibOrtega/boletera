@@ -5,6 +5,7 @@ import connectMongo from "@/libs/mongoose";
 import configFile from "@/config";
 import User from "@/models/User";
 import { findCheckoutSession } from "@/libs/stripe";
+import Order from "@/models/Order";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -43,6 +44,9 @@ export async function POST(req) {
 
         const session = await findCheckoutSession(data.object.id);
 
+        // Log metadata from the session
+        console.log("Session metadata:", session.metadata);
+
         const customerId = session?.customer;
         const priceId = session?.line_items?.data[0]?.price.id;
         const userId = data.object.client_reference_id;
@@ -73,10 +77,22 @@ export async function POST(req) {
           throw new Error("No user found");
         }
 
+        // Create new order
+        const newOrder = await Order.create({
+          userId: user._id,
+          eventId: session.metadata.eventId, // Assuming you're passing eventId in metadata
+          quantity: session.metadata.quantity || 1,
+          totalAmount: session.amount_total / 100, // Stripe amounts are in cents
+          stripeSessionId: session.id,
+        });
+
+        await newOrder.save();
+        console.log("New order created:", newOrder);
+
         // Update user data + Grant user access to your product. It's a boolean in the database, but could be a number of credits, etc...
-        user.priceId = priceId;
+        // user.priceId = priceId;
         user.customerId = customerId;
-        user.hasAccess = true;
+        // user.hasAccess = true;
         await user.save();
 
         // Extra: send email with user link, product page, etc...

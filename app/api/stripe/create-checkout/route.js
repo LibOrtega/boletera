@@ -44,8 +44,8 @@ export async function POST(req) {
     // Actualiza la URL de éxito a tu página personalizada
     const customSuccessUrl =
       process.env.NODE_ENV === "development"
-        ? "http://localhost:3000/thanks"
-        : `https://${config.domainName}/thanks`; // Para desarrollo
+        ? "http://localhost:3000/thanks/checkoutsuccess"
+        : `https://${config.domainName}/thanks/checkoutsuccess`; // Para desarrollo
 
     const stripeSessionURL = await createCheckout({
       priceId,
