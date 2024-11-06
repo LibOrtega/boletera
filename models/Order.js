@@ -11,7 +11,8 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
   eventId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Event",
     required: true,
   },
   quantity: {

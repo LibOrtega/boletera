@@ -10,11 +10,8 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 // It's called by the <ButtonCheckout /> component
 // By default, it doesn't force users to be authenticated. But if they are, it will prefill the Checkout data with their email and/or credit card
 export async function POST(req) {
-  console.log("Hola Perro");
-
   try {
     const body = await req.json(); //toma el data que recibe
-    console.log("body =>", body);
     const {
       eventName,
       buyerName,
