@@ -200,7 +200,7 @@ const Hero = () => {
                   {event.organizer}
                 </p>
                 <p className="text-xl opacity-60 mb-4 font-bold ">
-                  <span className="inline-block mr-2 ">🤑</span>${event.price}{" "}
+                  <span className="inline-block mr-2 "></span>${event.price}{" "}
                   MXN
                 </p>
               </div>
