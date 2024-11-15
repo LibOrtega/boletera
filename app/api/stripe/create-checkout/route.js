@@ -4,6 +4,7 @@ import { authOptions } from "@/libs/next-auth";
 import { createCheckout } from "@/libs/stripe";
 import connectMongo from "@/libs/mongoose";
 import User from "@/models/User";
+import config from "@/config";
 
 // This function is used to create a Stripe Checkout Session (one-time payment or subscription)
 // It's called by the <ButtonCheckout /> component
@@ -38,10 +39,13 @@ export async function POST(req) {
 
     const user = await User.findById(session?.user?.id);
 
-    const { priceId, mode, successUrl, cancelUrl } = body;
+    const { priceId, mode, cancelUrl } = body;
 
     // Actualiza la URL de éxito a tu página personalizada
-    const customSuccessUrl = "http://localhost:3000/thanks"; // Para desarrollo
+    const customSuccessUrl =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000/thanks/checkoutsuccess"
+        : `https://${config.domainName}/thanks/checkoutsuccess`; // Para desarrollo
 
     const stripeSessionURL = await createCheckout({
       priceId,
