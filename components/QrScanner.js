@@ -38,7 +38,6 @@ const QrReader = () => {
     console.log(parsedData.eventId); // Imprime el eventId
     console.log(parsedData.user.email); // Imprime el email del usuario
     console.log(parsedData.user.name); // Imprime el nombre del usuario
-    // {{ edit_2 }}
   };
 
   // Fail
