@@ -6,10 +6,13 @@ import configFile from "@/config";
 import User from "@/models/User";
 import { findCheckoutSession } from "@/libs/stripe";
 import Order from "@/models/Order";
+import { createTicket } from "@/components/Tickets";
+import { EmailTemplate } from "@/components/EmailTemplate";
 const orderid = require("order-id")("key");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+// const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const webhookSecret = "whsec_hLM5Dix9rssFelCOBfbWWRvTlHcFZ0Qy";
 
 // This is where we receive Stripe webhook events
 // It used to update the user data, send emails, etc...
@@ -143,6 +146,19 @@ export async function POST(req) {
 
           await newOrder.save();
           console.log("New order created:", newOrder);
+
+          const ticketQrData = {
+            orderId: orderid.generate(),
+            eventId: orderData.eventId,
+            userData: {
+              customerEmail,
+              customerName
+            }
+          }
+
+         const ticketCreated = await createTicket(ticketQrData);
+         console.log({ticketCreated})
+       
 
           // Update user data
           if (customerId) {
