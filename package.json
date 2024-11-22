@@ -33,6 +33,7 @@
     "nextjs-toploader": "^1.6.11",
     "nodemailer": "^6.9.16",
     "order-id": "^2.1.2",
+    "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

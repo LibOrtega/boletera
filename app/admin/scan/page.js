@@ -1,5 +1,9 @@
-export default function page(){
-    return (
-     <h1>hola mundo</h1>
-    )
+import QrReader from "@/components/QrScanner";
+
+export default function page() {
+  return (
+    <div>
+      <QrReader />
+    </div>
+  );
 }

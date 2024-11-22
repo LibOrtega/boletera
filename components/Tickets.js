@@ -1,14 +1,12 @@
-import ticketsLib from "@/libs/ticketsLib"
-import sendEmailWithQrCode from "@/libs/emailService"
+import ticketsLib from "@/libs/ticketsLib";
+import sendEmailWithQrCode from "@/libs/emailService";
 import unixToFormat from "@/utils/unixToFormat";
 
 export const createTicket = async (ticketData) => {
-
   // const startTimeLocalText = `${unixToFormat(
   //   eventData.startTime,
   //   "d 'de' MMMM yyyy h:mm aa"
   // )} `;
-
 
   try {
     const qrCodeImage = await ticketsLib.generateQrCode({
@@ -17,20 +15,17 @@ export const createTicket = async (ticketData) => {
       user: {
         email: ticketData.userData.customerEmail,
         name: ticketData.userData.customerName,
-      },  
+      },
     });
-    
-    const sendEmail = await sendEmailWithQrCode(ticketData.userData.customerEmail, ticketData.userData.customerName, qrCodeImage);
-    console.log(sendEmail)
 
+    const sendEmail = await sendEmailWithQrCode(
+      ticketData.userData.customerEmail,
+      ticketData.userData.customerName,
+      qrCodeImage
+    );
+    console.log(sendEmail);
 
-    // const ticket = await ticketsLib.generateTicket({
-    //   ...ticketData,
-    //   orderId: ticketData.orderId,
-    //   qrCode: qrCodeImage,
-    // }, startTimeLocalText);
-
-    const ticket = "Ticket generado"
+    const ticket = "Ticket generado";
 
     return ticket;
   } catch (error) {
