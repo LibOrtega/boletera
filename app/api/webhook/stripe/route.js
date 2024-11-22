@@ -12,6 +12,7 @@ const orderid = require("order-id")("key");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const webhookSecret = "whsec_hLM5Dix9rssFelCOBfbWWRvTlHcFZ0Qy";
 
 // This is where we receive Stripe webhook events
 // It used to update the user data, send emails, etc...

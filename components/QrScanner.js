@@ -21,12 +21,6 @@ const QrReader = () => {
   const [scannedResult, setScannedResult] = useState("");
   const scannedData = decode(scannedResult);
   console.log(scannedData);
-  const parsedData = JSON.parse(scannedData); // Analiza el JSON
-  console.log(parsedData.orderId); // Imprime el orderId
-  console.log(parsedData.eventId); // Imprime el eventId
-  console.log(parsedData.user.email); // Imprime el email del usuario
-  console.log(parsedData.user.name); // Imprime el nombre del usuario
-  // {{ edit_2 }}
 
   // Success
   const onScanSuccess = (result) => {
@@ -36,10 +30,15 @@ const QrReader = () => {
     // 😎 Save the scanned result in a variable before decoding.
     const rawResult = result?.data;
     setScannedResult(rawResult);
-    // const decodedData = decode(rawResult);
-    // console.log(decodedData); // Log the decoded data
-    // const parsedData = JSON.parse(decodedData);
-    // console.log(parsedData); // Log the parsed data
+    const decodedData = decode(rawResult);
+    console.log(decodedData); // Log the decoded data
+    const parsedData = JSON.parse(decodedData);
+    console.log(parsedData); // Log the parsed data
+    console.log(parsedData.orderId); // Imprime el orderId
+    console.log(parsedData.eventId); // Imprime el eventId
+    console.log(parsedData.user.email); // Imprime el email del usuario
+    console.log(parsedData.user.name); // Imprime el nombre del usuario
+    // {{ edit_2 }}
   };
 
   // Fail
