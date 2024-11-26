@@ -6,7 +6,7 @@ import configFile from "@/config";
 import User from "@/models/User";
 import { findCheckoutSession } from "@/libs/stripe";
 import Order from "@/models/Order";
-import { createTicket } from "@/components/Tickets";
+import { createTicket } from "@/libs/ticketCreate";
 import { EmailTemplate } from "@/components/EmailTemplate";
 const orderid = require("order-id")("key");
 
@@ -131,10 +131,12 @@ export async function POST(req) {
             });
             console.log("Created temporary user:", user);
           }
+          const generatedOrderId = orderid.generate();
+          console.log("Generated Order ID:", generatedOrderId);
 
           // Create new order with validated data
           const newOrder = await Order.create({
-            orderId: orderid.generate(),
+            orderId: generatedOrderId,
             userId: user._id,
             eventId: orderData.eventId,
             stripeSessionId: session.id,
@@ -144,16 +146,22 @@ export async function POST(req) {
             totalAmount: orderData.totalAmount || session.amount_total / 100, // Fallback to session amount
           });
 
+          // await newOrder.save();
+          // console.log("New order created:", newOrder);
           await newOrder.save();
-          console.log("New order created:", newOrder);
+          console.log(
+            "Order stored in DB:",
+            await Order.findById(newOrder._id)
+          );
 
           const ticketQrData = {
-            orderId: orderid.generate(),
-            eventId: orderData.eventId,
+            orderId: newOrder.orderId,
+            eventId: newOrder.eventId,
             userData: {
-              customerEmail,
-              customerName,
+              customerEmail: user.email,
+              customerName: user.name,
             },
+            stripeSessionId: session.id,
           };
 
           const ticketCreated = await createTicket(ticketQrData);

@@ -200,8 +200,7 @@ const Hero = () => {
                   {event.organizer}
                 </p>
                 <p className="text-xl opacity-60 mb-4 font-bold ">
-                  <span className="inline-block mr-2 "></span>${event.price}{" "}
-                  MXN
+                  <span className="inline-block mr-2 "></span>${event.price} MXN
                 </p>
               </div>
 
@@ -356,30 +355,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
-function EventCard({ image, title, date, location, organizer }) {
-  return (
-    <div className="overflow-hidden bg-gray-800 text-white rounded-lg">
-      <img
-        alt={title}
-        className="object-cover w-full h-48"
-        height="200"
-        src={image}
-        style={{
-          aspectRatio: "300/200",
-          objectFit: "cover",
-        }}
-        width="300"
-      />
-      <div className="p-4">
-        <h2 className="text-xl font-semibold mb-2">{title}</h2>
-        <p className="text-sm text-gray-400 mb-1">{date}</p>
-        <p className="text-sm text-gray-400">{location}</p>
-        <p className="text-sm text-base-content opacity-60 mb-4">
-          <span className="inline-block mr-2">🎟</span>
-          {organizer}
-        </p>
-      </div>
-    </div>
-  );
-}

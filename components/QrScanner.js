@@ -9,6 +9,7 @@ import QrScanner from "qr-scanner";
 import QrFrame from "@/public/qr-frame.svg";
 import Image from "next/image";
 import { decode } from "js-base64";
+import { set } from "mongoose";
 
 const QrReader = () => {
   // QR States
@@ -38,6 +39,8 @@ const QrReader = () => {
     console.log(parsedData.eventId); // Imprime el eventId
     console.log(parsedData.user.email); // Imprime el email del usuario
     console.log(parsedData.user.name); // Imprime el nombre del usuario
+    console.log(parsedData.stripeSessionId); // Imprime el stripeSessionId
+    setScannedResult(parsedData.stripeSessionId);
   };
 
   // Fail
@@ -104,7 +107,7 @@ const QrReader = () => {
             color: "white",
           }}
         >
-          Scanned Result: {scannedResult}
+          Stripe Session ID: {scannedResult}
         </p>
       )}
     </div>

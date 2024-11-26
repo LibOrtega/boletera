@@ -12,6 +12,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 export async function POST(req) {
   try {
     const body = await req.json(); //toma el data que recibe
+    console.log("body", body);
     const {
       eventName,
       buyerName,
@@ -82,6 +83,7 @@ export async function POST(req) {
       metadata: {
         stringifyMetadata: JSON.stringify(metadata),
       },
+      customer_email: email,
       billing_address_collection: "auto",
       phone_number_collection: {
         enabled: true,
@@ -94,6 +96,7 @@ export async function POST(req) {
     };
 
     const session = await stripe.checkout.sessions.create(options);
+    console.log("Session:", session);
 
     return NextResponse.json(session);
   } catch (error) {
