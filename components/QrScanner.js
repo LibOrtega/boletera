@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-// Qr Scanner
+import React, { useEffect, useState } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { decode } from "js-base64";
 
@@ -10,37 +8,15 @@ const QrReader = () => {
   const [scanResult, setScanResult] = useState(null);
   const [scanStatus, setScanStatus] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [scannedData, setScannedData] = useState(null);
+  const [scannerInstance, setScannerInstance] = useState(null);
 
-  const onScanSuccess = async (result) => {
-    // const rawResult = result;
-    const decodedData = decode(result);
-    console.log(decodedData);
-    const parsedData = JSON.parse(decodedData);
-
-    const stripeSessionId = parsedData.stripeSessionId;
-
-    const response = await fetch("/api/scan", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ stripeSessionId }),
-    });
-
-    const data = await response.json();
-    console.log(data);
-    if (data.status === "success") {
-      setScanStatus("Orden escaneada exitosamente");
-    } else if (data.status === "already_scanned") {
-      setScanStatus("Esta orden ya ha sido escaneada anteriormente");
-    } else if (data.status === "error") {
-      setScanStatus("Error al escanear la orden");
+  const resetScanner = () => {
+    if (scannerInstance) {
+      scannerInstance.clear();
     }
-    setIsModalOpen(true);
-  };
 
-  useEffect(() => {
-    const scannerHtml = new Html5QrcodeScanner("reader", {
+    const newScanner = new Html5QrcodeScanner("reader", {
       qrbox: {
         width: 250,
         height: 250,
@@ -48,34 +24,104 @@ const QrReader = () => {
       fps: 5,
     });
 
-    scannerHtml.render(success, error);
+    newScanner.render(success, error);
+    setScannerInstance(newScanner);
+    setScanResult(null);
+  };
 
-    function success(result) {
-      scannerHtml.clear();
-      setScanResult(result);
-      onScanSuccess(result);
-      // Si quieres que siga escaneando después de encontrar un resultado
+  const onScanSuccess = async (result) => {
+    try {
+      const decodedData = decode(result);
+      const parsedData = JSON.parse(decodedData);
+
+      if (!parsedData.stripeSessionId) {
+        setScanStatus("El código QR no contiene la información necesaria");
+        setScannedData(null);
+        setIsModalOpen(true);
+        return;
+      }
+
+      if (scanStatus) {
+        return;
+      }
+
+      const response = await fetch("/api/scan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ stripeSessionId: parsedData.stripeSessionId }),
+      });
+
+      const data = await response.json();
+      setScannedData(parsedData);
+
+      if (data.status === "success") {
+        setScanStatus("Orden escaneada exitosamente");
+      } else if (data.status === "already_scanned") {
+        setScanStatus("Esta orden ya ha sido escaneada anteriormente");
+      } else {
+        setScanStatus("Error al escanear la orden");
+      }
+
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error processing QR code:", error);
+      setScanStatus("Error al procesar el código QR");
+      setIsModalOpen(true);
     }
-    function error(err) {
-      console.warn(err);
-    }
+  };
+
+  useEffect(() => {
+    resetScanner();
+
+    return () => {
+      if (scannerInstance) {
+        scannerInstance.clear();
+      }
+    };
   }, []);
+
+  function success(result) {
+    if (scannerInstance) {
+      scannerInstance.clear();
+    }
+    setScanResult(result);
+    onScanSuccess(result);
+  }
+
+  function error(err) {
+    console.warn(err);
+  }
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-80 text-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4 text-center">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">
-              Estado del Escaneo
+              Resultado del Escaneo
             </h2>
-            <p className="text-gray-600 mb-6">{scanStatus}</p>
+            <p className="text-gray-600 mb-4">{scanStatus}</p>
+
+            {/* Display scanned data if available */}
+            {scannedData && (
+              <div className="bg-gray-100 rounded p-4 mb-4 text-black">
+                <h3 className="font-medium mb-2">Datos del QR:</h3>
+                <pre className="text-sm text-left overflow-x-auto">
+                  {JSON.stringify(scannedData, null, 2)}
+                </pre>
+              </div>
+            )}
+
             <button
               onClick={closeModal}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
               Cerrar
             </button>
@@ -83,16 +129,24 @@ const QrReader = () => {
         </div>
       )}
 
-      {scanResult ? (
-        <div className="w-full h-full bg-black text-white font-medium">
-          <p>Si desea escanear otro código QR, pulse aqui.</p>
-        </div>
-      ) : (
+      {/* QR Scanner Container */}
+      <div className="w-full max-w-md">
         <div
           id="reader"
-          className="bg-white rounded shadow p-4 text-black flex flex-col items-center justify-center"
+          className="bg-white rounded-lg shadow-md w-full flex flex-col items-center justify-center text-black"
         ></div>
-      )}
+
+        {scanResult && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={resetScanner}
+              className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+            >
+              Escanear Otro Código QR
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
