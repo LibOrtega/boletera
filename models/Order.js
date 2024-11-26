@@ -36,6 +36,10 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "completed", "failed"],
     default: "completed",
   },
+  isScanned: {
+    type: Boolean,
+    default: false,
+  },
   stripeSessionId: String,
   createdAt: {
     type: Date,
