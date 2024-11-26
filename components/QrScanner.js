@@ -1,162 +1,97 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import "@/components/QrStyles.css";
+import { useEffect, useState } from "react";
 
 // Qr Scanner
-import QrScanner from "qr-scanner";
-import QrFrame from "@/public/qr-frame.svg";
-import Image from "next/image";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import { decode } from "js-base64";
 
 const QrReader = () => {
-  const scanner = useRef();
-  const videoEl = useRef();
-  const qrBoxEl = useRef();
-  const [qrOn, setQrOn] = useState(true);
-
-  const [scanResult, setScanResult] = useState({
-    status: "",
-    error: "",
-    showModal: false,
-  });
+  const [scanResult, setScanResult] = useState(null);
+  const [scanStatus, setScanStatus] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onScanSuccess = async (result) => {
-    try {
-      const rawResult = result?.data;
-      const decodedData = decode(rawResult);
-      const parsedData = JSON.parse(decodedData);
+    // const rawResult = result;
+    const decodedData = decode(result);
+    console.log(decodedData);
+    const parsedData = JSON.parse(decodedData);
 
-      const stripeSessionId = parsedData.stripeSessionId;
+    const stripeSessionId = parsedData.stripeSessionId;
 
-      const response = await fetch("/api/scan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ stripeSessionId }),
-      });
+    const response = await fetch("/api/scan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ stripeSessionId }),
+    });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setScanResult({
-          status: "Orden escaneada correctamente",
-          error: "",
-          showModal: true,
-        });
-
-        // Stop scanning after successful scan
-        scanner.current?.stop();
-      } else if (data.message === "El código ya fue escaneado") {
-        setScanResult({
-          status: "",
-          error: "Este código ya fue escaneado.",
-          showModal: true,
-        });
-
-        // Stop scanning after error
-        scanner.current?.stop();
-      } else {
-        setScanResult({
-          status: "",
-          error: data.message || "Error al escanear la orden.",
-          showModal: true,
-        });
-
-        // Stop scanning after error
-        scanner.current?.stop();
-      }
-    } catch (error) {
-      setScanResult({
-        status: "",
-        error: "Error de conexión al escanear.",
-        showModal: true,
-      });
-
-      // Stop scanning after error
-      scanner.current?.stop();
-      console.error("Error en el escaneo:", error);
+    const data = await response.json();
+    console.log(data);
+    if (data.status === "success") {
+      setScanStatus("Orden escaneada exitosamente");
+    } else if (data.status === "already_scanned") {
+      setScanStatus("Esta orden ya ha sido escaneada anteriormente");
+    } else if (data.status === "error") {
+      setScanStatus("Error al escanear la orden");
     }
-  };
-
-  const onScanFail = (err) => {
-    console.log(err);
-    setScanResult({
-      status: "",
-      error: "Escaneo fallido.",
-      showModal: false,
-    });
-  };
-
-  const handleCloseModal = () => {
-    setScanResult({
-      status: "",
-      error: "",
-      showModal: false,
-    });
-
-    // Restart scanning
-    scanner.current?.start();
+    setIsModalOpen(true);
   };
 
   useEffect(() => {
-    if (videoEl?.current && !scanner.current) {
-      scanner.current = new QrScanner(videoEl?.current, onScanSuccess, {
-        onDecodeError: onScanFail,
-        preferredCamera: "environment",
-        highlightScanRegion: true,
-        highlightCodeOutline: true,
-        overlay: qrBoxEl?.current || undefined,
-      });
+    const scannerHtml = new Html5QrcodeScanner("reader", {
+      qrbox: {
+        width: 250,
+        height: 250,
+      },
+      fps: 5,
+    });
 
-      scanner?.current
-        ?.start()
-        .then(() => setQrOn(true))
-        .catch((err) => {
-          if (err) setQrOn(false);
-        });
+    scannerHtml.render(success, error);
+
+    function success(result) {
+      scannerHtml.clear();
+      setScanResult(result);
+      onScanSuccess(result);
+      // Si quieres que siga escaneando después de encontrar un resultado
     }
-
-    return () => {
-      if (!videoEl?.current) {
-        scanner?.current?.stop();
-      }
-    };
+    function error(err) {
+      console.warn(err);
+    }
   }, []);
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
-    <div className="qr-reader relative">
-      <video ref={videoEl}></video>
-      <div ref={qrBoxEl} className="qr-box">
-        <Image
-          src={QrFrame}
-          alt="Qr Frame"
-          width={256}
-          height={256}
-          className="qr-frame"
-        />
-      </div>
-
-      {/* Modal for scan results */}
-      {scanResult.showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[100]">
-          <div className="bg-white rounded-md p-6 max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-4">Resultado del Escaneo</h2>
-            {scanResult.status && (
-              <p className="text-green-600 mb-4">{scanResult.status}</p>
-            )}
-            {scanResult.error && (
-              <p className="text-red-600 mb-4">{scanResult.error}</p>
-            )}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-80 text-center">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              Estado del Escaneo
+            </h2>
+            <p className="text-gray-600 mb-6">{scanStatus}</p>
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
-              onClick={handleCloseModal}
+              onClick={closeModal}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
             >
               Cerrar
             </button>
           </div>
         </div>
+      )}
+
+      {scanResult ? (
+        <div className="w-full h-full bg-black text-white font-medium">
+          <p>Si desea escanear otro código QR, pulse aqui.</p>
+        </div>
+      ) : (
+        <div
+          id="reader"
+          className="bg-white rounded shadow p-4 text-black flex flex-col items-center justify-center"
+        ></div>
       )}
     </div>
   );
