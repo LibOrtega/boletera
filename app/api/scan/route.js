@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Order from "@/models/Order";
 import connectMongo from "@/libs/mongoose";
 

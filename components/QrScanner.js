@@ -21,7 +21,7 @@ const QrReader = () => {
         width: 250,
         height: 250,
       },
-      fps: 5,
+      fps: 1,
     });
 
     newScanner.render(success, error);
