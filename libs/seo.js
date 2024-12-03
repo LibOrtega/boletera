@@ -31,7 +31,7 @@ export const getSEOTags = ({
     openGraph: {
       title: openGraph?.title || config.appName,
       description: openGraph?.description || config.appDescription,
-      url: openGraph?.url || `https://${config.domainName}/`,
+      url: openGraph?.url || `https://https://res.cloudinary.com/dozhrm24l/image/upload/v1733188715/WhatsApp_Image_2024-11-28_at_1.36.43_AM_drhqje.jpg`,
       siteName: openGraph?.title || config.appName,
       // If you add an opengraph-image.(jpg|jpeg|png|gif) image to the /app folder, you don't need the code below
       // images: [
